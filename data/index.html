@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Noah Tomkins Web Server</title>
+
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+            color: white;
+            font-family:Arial, Helvetica, sans-serif;
+        }
+
+        header, footer {
+            background-color: #2c2f31;
+            padding: 16px;
+            color: white;
+        }
+
+        body {
+            background-color: #181a1b;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        footer {
+            display: flex;
+            flex-direction: column;
+        }
+
+        main {
+            flex: 1;
+            padding: 20px;
+        }
+
+        .centered-div {
+            background-color: #2c2f31;
+
+            width: fit-content;
+            height: fit-content;
+            margin: 10px;
+            padding: 20px;
+            color: white;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .d-flex-column {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .my-1 {
+            margin: 0.2rem 0;
+        }
+        
+        @media only screen and (max-width: 700px) {
+            .title {
+                font-size: 8vw;
+                color: red;
+            }
+
+            .temp {
+                font-size: 15vw;
+            }
+        }
+
+        @media only screen and (min-width: 701px) {
+            .title {
+                font-size: 4rem;
+            }
+
+            .temp {
+                font-size: 3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <div class="d-flex-column text-center">
+            <span class="my-1 title">Current Temperature</span>
+            <span class="my-1 temp" id="temp" onclick="onClickTemp()">...</span>
+        </div>
+    </main>
+    <footer>
+        <span>Name: Noah Tomkins</span>
+        <span>Student ID: 000790079</span>
+        <span>Sensor ID: <span id="sensorId"></span></span>
+    </footer>
+    <script>
+        const temp = document.getElementById("temp");
+        const sensorId = document.getElementById("sensorId");
+
+        let currentTemp = null;
+        let celsius = true;
+
+        getData();
+        setInterval(() => getData(), 5000);
+
+        function getData() {
+            fetch("/getData")
+                .then((response) => response.json())
+                .then((data) => {
+                    console.log(data);
+
+                    if (data["temp"] === null || data["temp"] === "")
+                        currentTemp = null;
+                    else
+                        currentTemp = parseFloat(data["temp"]);
+
+                    if (data["sensor_id"] !== null && data["sensor_id"] !== "")
+                        sensorId.innerHTML = data["sensor_id"];
+
+                    setTempDisplay();
+                });
+        }
+
+        function setTempDisplay() {
+            if (!currentTemp || currentTemp === null) {
+                temp.innerHTML = "...";
+                return;
+            }
+
+            if (celsius) {
+                temp.innerHTML = currentTemp.toFixed(2) + " &deg;C";
+            } else {
+                let f = (currentTemp * (9/5)).toFixed(2);
+                temp.innerHTML = f + " &deg;F";
+            }
+        }
+
+        function onClickTemp() {
+            celsius = !celsius;
+            setTempDisplay();
+        }
+
+    </script>
+</body>
+</html>
